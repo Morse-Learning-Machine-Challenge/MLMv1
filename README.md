@@ -24,4 +24,11 @@ You can commit all changes and upload your code and supporting files  using the 
 	git commit -a 
 	git push
 	
+You will be prompted your github username and password. You files will be then uploaded to Github repository. 
+
+If you have any difficulties you can ask questions in Kaggle Forum https://inclass.kaggle.com/c/morse-challenge/forums
+
+73, 
+Mauri  AG1LE 
+	
 
