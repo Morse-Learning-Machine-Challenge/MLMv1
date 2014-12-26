@@ -7,6 +7,7 @@ This is a Github repository for MLM v1 challenge in Kaggle (https://inclass.kagg
 Participants of this challenge are asked to share their code as open source preferably using 
 GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 GPL v3 instructions can be found from here: http://www.gnu.org/copyleft/gpl.html
+
 Please attach a header to the start of each source file as explained in section "How to Apply These Terms to Your New Programs". 
 
 You should have received an invitation to Github in the same email account you used for Kaggle.
