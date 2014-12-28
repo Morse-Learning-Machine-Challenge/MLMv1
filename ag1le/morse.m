@@ -57,6 +57,7 @@ end
 if nargin>=8
 playsound = varargin{8};
 end
+
 t=0:1/Fs:1.2/code_speed; %One dit of time at w wpm is 1.2/w.
 t=t';
 Dit = sin(2*pi*f_code*t);
@@ -68,6 +69,7 @@ Dah = sin(2*pi*f_code*t2);
 lsp = zeros(size(Dah));    # changed size argument to function of Dah 
 #Dah = [Dit;Dit;Dit];
 #lsp = zeros(size([Dit;Dit;Dit]));
+
 % Defining Characters & Numbers
 A = [Dit;ssp;Dah];
 B = [Dah;ssp;Dit;ssp;Dit;ssp;Dit];
@@ -115,26 +117,26 @@ vars ={'period','comma','question','slash_'};
 % start with pause (7 dit lengths)
 morsecode=[ssp;ssp;ssp;ssp;ssp;ssp;ssp];
 for i=1:length(text)
-if isvarname(text(i))
-morsecode = [morsecode;eval(text(i))];
-elseif ismember(text(i),'.,?/')
-x = findstr(text(i),'.,?/');
-morsecode = [morsecode;eval(vars{x})];
-elseif ~isempty(str2num(text(i)))
-morsecode = [morsecode;eval(['n' text(i)])];
-elseif text(i)==' '
-morsecode = [morsecode;ssp;ssp;ssp;ssp];
-end
-morsecode = [morsecode;lsp];
+	if isvarname(text(i))
+		morsecode = [morsecode;eval(text(i))];
+	elseif ismember(text(i),'.,?/')
+		x = findstr(text(i),'.,?/');
+		morsecode = [morsecode;eval(vars{x})];
+	elseif ~isempty(str2num(text(i)))
+		morsecode = [morsecode;eval(['n' text(i)])];
+	elseif text(i)==' '
+		morsecode = [morsecode;ssp;ssp;ssp;ssp];
+	end
+	morsecode = [morsecode;lsp];
 end
 if exist('length_N','var')
-append_length = length_N - length(morsecode);
-if (append_length < 0)
-printf("Length %d isn't large enough for your message; it must be > %d.\n",length_N,length(morsecode));
-return;
-else
-morsecode = [morsecode; zeros(append_length,1)];
-end
+	append_length = length_N - length(morsecode);
+	if (append_length < 0)
+		printf("Length %d isn't large enough for your message; it must be > %d.\n",length_N,length(morsecode));
+		return;
+	else
+		morsecode = [morsecode; zeros(append_length,1)];
+	end
 end
 % end with pause (14 dit lengths)
 morsecode=[morsecode; ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp;ssp];

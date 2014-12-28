@@ -3,7 +3,7 @@
 morse.py
 ========
 
-morse.py 			- Python based Morse decoder
+morse.py 			- Python based Morse decoder <br>
 morse.m  			- Octave based Morse generator
 generate_morse.m 	- Octave based Morse data set generator
 levenshtein.py		- Calculate Levenshtein distance of two text files 
