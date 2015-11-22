@@ -83,6 +83,22 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
     
     return np.fft.rfft(frames)    
 
+class KalmanFilter1D:
+    def __init__(self, x0, P, R, Q):
+        self.x = x0 #initial state
+        self.P = P  #initial variance estimate 
+        self.R = R  # sensor noise (measurement error estimate)  
+        self.Q = Q  # movement noise  (process noise estimate) 
+
+
+    def update(self, z):
+        self.x = (self.P * z + self.x * self.R) / (self.P + self.R)
+        self.P = 1. / (1./self.P + 1./self.R)
+
+
+    def predict(self, u=0.0):
+        self.x += u
+        self.P += self.Q
 
 # returns a simple rolling average of n most recent values
 # Adapted from: http://www.raspberrypi.org/forums/viewtopic.php?f=32&t=69797
@@ -258,13 +274,34 @@ class Morse:
 
 # decode signal envelope into Morse symbols and then characters
 def decode_stream(signal,samplerate):
+
 	# create morse object
 	m = Morse(signal,samplerate)
-
+	estimate =[]
+	ps = []
+	x0 = signal[0]
+	mx = np.nanmax(signal)
+	r=np.std(signal)/mx
+	print x0,r
+	kf = KalmanFilter1D(x0, P=1000., R=r, Q = 1000.)
+	for i in range(len(signal)):
+		kf.predict()
+		kf.update(signal[i])
+		estimate.append(kf.x)
+		ps.append(kf.P)  
+	if plotter:        
+		ax1=plt.subplot(2,1,1)
+		plt.plot(signal,'g-',estimate,'r-')
+		ax1.set_title("Signal(g) - Estimate(r)")
+		ax2=plt.subplot(2,1,2)
+		plt.plot(ps)
+		ax2.set_title("Variance")
+		plt.show()
 	# assume 10ms signal rise time 
 	bfv = (samplerate * .010)   
 	# moving average filter to smooth signal envelope - reduce noise spikes
 	env = np.resize(np.convolve(signal, np.ones(bfv)/bfv),len(signal))
+	#env = estimate
 	mx = np.nanmax(env)
 	mn = np.nanmin(env)
 	mean = np.mean(env)
@@ -321,7 +358,7 @@ def decode_stream(signal,samplerate):
 		plt.show()
 
 def demodulate(x,Fs,freq):
-	# demodulate audio signal with known CW frequency 
+    # demodulate audio signal with known CW frequency 
 	t = np.arange(len(x))/ float(Fs)
 	y =  x*((1 + np.sin(2*np.pi*freq*t))/2 )	
 	
@@ -330,9 +367,9 @@ def demodulate(x,Fs,freq):
 	#for high SNR signals 50 Hz is better, for low SNR 20Hz is better
 	# 25Hz is a compromise - could this be made an adaptive value? 
 	Wn = 40./ (Fs/2.)  	# 25 Hz cut-off for lowpass  
-	b, a = butter(2, Wn)  	# 2nd order butter filter
+	b, a = butter(7, Wn)  	# 2nd order butter filter
+	#z = filtfilt(b, a, abs(y))
 	z = filtfilt(b, a, abs(y))
-	
 	#pass envelope magnitude to decoder 
 	decode_stream(z,Fs)
 
@@ -355,8 +392,8 @@ def process(fname):
 	if plotter:
 		plt.plot(f[0:len(f)/2-1],abs(s[0:len(s)/2-1]),'g-')
 		print maxtab
-		from matplotlib.pyplot import plot, scatter, show
-		scatter(maxtab[:,0], maxtab[:,1], color='blue')
+		#from matplotlib.pyplot import plot, scatter, show
+		plt.scatter(maxtab[:,0], maxtab[:,1], c='r') #color='blue')
 		plt.show()
 	
 	# process all CW stations with higher than threshold volume
